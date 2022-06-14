@@ -1,0 +1,42 @@
+package com.epam.postrest.converter;
+
+import java.io.IOException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+@Component
+public class FileReader {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileReader.class);
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    public <T> T read(Resource resource, Class<T> targetClass) {
+        objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        Object result = null;
+        try {
+            result = objectMapper.readValue(resource.getInputStream(), targetClass);
+        } catch (IOException exception) {
+            LOGGER.error("Failed to load file.");
+        }
+        return (T) result;
+    }
+
+    public byte[] readFileToBytes(Resource resource) {
+        byte[] result = null;
+        try {
+            result = resource.getInputStream().readAllBytes();
+        } catch (IOException e) {
+            LOGGER.error("Failed to read file.");
+        }
+        return result;
+    }
+}
